@@ -5,8 +5,8 @@
 
 MD5_CTX ctx;
 
-void add(FILE *f, unsigned char* hash);
-void test(FILE *f, unsigned char* hash);
+void add(FILE* f, unsigned char* hash);
+void test(FILE* f, unsigned char* hash);
 void eofHash(FILE* f, unsigned char* hash);
 void strip(FILE* f);
 int hashCmp(unsigned char* a, unsigned char*b);
@@ -15,7 +15,7 @@ void printHash(unsigned char* hash);
 
 int main(int iArgC, char* argV[])
 {
-	if(iArgC < 2)
+	if(iArgC < 3)
 	{
 		printf("Missing parameters\n");
 		return 1;
@@ -23,7 +23,6 @@ int main(int iArgC, char* argV[])
 	
 	
 	unsigned char hash[16];
-	unsigned char checkHash[16];
 	char* fileName;
 	char* command = argV[1];
 	fileName = argV[2];
@@ -39,6 +38,7 @@ int main(int iArgC, char* argV[])
 	}
 	else if(strcmp(command, "-test") == 0)
 	{
+		unsigned char checkHash[16];
 		printf("Testing\n");
 		test(f, hash);
 		eofHash(f, checkHash);
@@ -48,7 +48,7 @@ int main(int iArgC, char* argV[])
 		
 		if(hashCmp(checkHash, hash))
 		{
-		printf("Hash good\n");
+			printf("Hash good\n");
 		}
 		else
 		{
@@ -59,15 +59,15 @@ int main(int iArgC, char* argV[])
 	{
 		strip(f);
 	}
+	fclose(f);
 
 	return 0;
 }
 
-void add(FILE *f, unsigned char* hash)
+void add(FILE* f, unsigned char* hash)
 {
 	rewind(f);
 	char c;
-	int length = 0;
 	if(f != NULL)
 	{
 		md5_init(&ctx);
@@ -76,9 +76,7 @@ void add(FILE *f, unsigned char* hash)
 			md5_update(&ctx, &c, 1);
 		}
 		md5_final(&ctx, hash);
-	}
-	//return 1;
-	
+	}	
 }
 
 
@@ -88,7 +86,6 @@ void test(FILE* f, unsigned char* hash)
 	char c;
 	if(f != NULL)
 	{
-		//unsigned char checkHash[16];
 		fseek(f, -16, SEEK_END);
 		unsigned int fileLength = ftell(f);
 		rewind(f);
@@ -108,11 +105,6 @@ void eofHash(FILE* f, unsigned char* hash)
 	if(f != NULL)
 	{
 		fseek(f, -16, SEEK_END);
-		/**for(int i = 0; i < 16; i++)
-		{
-			c = getc(f);
-			hash[i] = c;
-		}*/
 		int i = 0;
 		while(!feof(f))
 		{		
@@ -135,7 +127,7 @@ void strip(FILE* f)
 }
 
 
-int hashCmp(unsigned char* a, unsigned char*b)
+int hashCmp(unsigned char* a, unsigned char* b)
 {
 	for(int i = 0; i < 16; i++)
 	{
@@ -152,7 +144,6 @@ void printHash(unsigned char* hash)
 	for(int i = 0; i < 16; i++)
 	{
 		printf("%02x", hash[i]);
-		//fwrite(hash[i], 1, 1, f);
 	}
 	printf("\n");
 	
